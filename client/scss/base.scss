@@ -1,0 +1,84 @@
+$min-px : 5px;
+
+$break-xxs: 480px;
+$break-xs: 767px;
+$break-sm: 991px;
+$break-md: 1200px;
+
+@-webkit-keyframes blink {
+    from, to { border-color: transparent }
+    50% { border-color: black }
+}
+
+@-moz-keyframes blink {
+    from, to { border-color: transparent }
+    50% { border-color: black }
+}
+
+@mixin respond($media) {
+	@if $media == xxs {
+		@media only screen and (max-width: $break-xxs) { @content; }
+	}
+	@else if $media == xs {
+		@media only screen and (min-width: $break-xxs + 1) and (max-width: $break-xs) { @content; }
+	}
+	@else if $media == sm {
+		@media only screen and (min-width: $break-xs + 1) and (max-width: $break-sm) { @content; }
+	}
+	@else if $media == md {
+		@media only screen and (min-width: $break-sm + 1) and (max-width: $break-md) { @content; }
+	}
+	@else if $media == lg {
+		@media only screen and (min-width: $break-md + 1) { @content; }
+	}
+	@else if $media == under-xs {
+		@media only screen and (max-width: $break-xs) { @content; }
+	}
+	@else if $media == under-sm {
+		@media only screen and (max-width: $break-sm) { @content; }
+	}
+	@else if $media == under-md {
+		@media only screen and (max-width: $break-md) { @content; }
+	}
+	@else if $media == over-xs {
+		@media only screen and (min-width: $break-xxs + 1) { @content; }
+	}
+	@else if $media == over-sm {
+		@media only screen and (min-width: $break-xs + 1) { @content; }
+	}
+	@else if $media == over-md {
+		@media only screen and (min-width: $break-sm + 1) { @content; }
+	}
+}
+
+
+@mixin prefix($name, $argument) {
+  -webkit-#{$name}: #{$argument};
+  -ms-#{$name}: #{$argument};
+  -moz-#{$name}: #{$argument};
+  -o-#{$name}: #{$argument};
+  #{$name}: #{$argument};
+}
+
+@mixin fixed(){
+	position : fixed;
+	left : 0;
+	right : 0;
+	top : 0;
+	bottom : 0;
+}
+@mixin absolute(){
+	position : absolute;
+	left : 0;
+	right : 0;
+	top : 0;
+	bottom : 0;
+}
+@mixin ellipsis(){
+	white-space : nowrap;
+	text-overflow : ellipsis;
+	-o-text-overflow : ellipsis;
+	overflow : hidden;
+	-moz-binding : url('ellipsis.xml#ellipsis');
+	text-overflow : ellipsis;
+}
