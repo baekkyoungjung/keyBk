@@ -2,48 +2,90 @@
 body {
 	font-size : 14px;
 };
-#test, #virtual-view{
-	-webkit-display: flex;
-			display: flex;
-	-webkit-align-items: center;
-	        align-items: center;
-	-webkit-justify-content: center;
-	        justify-content: center;
+
+@-webkit-keyframes blink {
+    from, to { background-color: transparent }
+    50% { background-color: white }
+}
+
+@-moz-keyframes blink {
+    from, to { background-color: transparent }
+    50% { background-color: white }
+}
+
+#virtual-view {
+	// -webkit-display: flex;
+	// 		display: flex;
+	// -webkit-align-items: center;
+	//         align-items: center;
+	// -webkit-justify-content: center;
+	//         justify-content: center;
+	// flex-wrap: wrap;
 };
 
 #virtual-write {
 	position : absolute;
-	left: 0;
-	width: auto;
+	top: -100%;
 };
 #test {
 	height: 600px;
 	width : 100%;
+	#status {
+		background-color : #999;
+	};
 	#virtual-view {
-		&.active {
-			color : #eee;
-		}
-		color: #777;
-		
-		outline : #000 solid 1px;
+		background-color : #444;
+	};
+	#status, #virtual-view {
+		margin: auto;
+		position: relative;
 		height: 100px;
 		width : 700px;
-		background-color : #444;
+		color: #777;
+		outline : #000 solid 1px;
+		overflow: hidden;
+		top: 50%;
+	};
+	#virtual-view {
+		#virtual-view-overlay {
+			@include prefix('transition', all 0.4s cubic-bezier(.08,.72,.53,1.08));
+			text-align: center;
+			position: absolute;
+		    left: 0;
+		    top: 0;
+			font-size: 6rem;
+			background-color:rgba(123, 123, 123, 0.8);
+			color : rgba(255,255,255,1);
+			transform: translateY(-100%);
+			width: 100%;
+			height:100%;
+
+			&.active {
+				transform: translateY(0%);
+			};
+		};
+		&.active {
+			color : #eee;
+		};
 		#real-word {
-			z-index: 999;
+			position: absolute;
+		    top: 0;
+		    left: 0;
+			
+			height: 100%;
 			font-size: 3.0rem;
 			> div {
 				padding-left: 3px;
 				text-align : center;
 				display: inline-block;
-				width: 20px;
+				min-width: 20px;
 				height: 35px;
 				// min-width: 10px;
 				// min-height: 35px;
 				&.mis-typing {
 					background-color : #B21F26;
 					color : #FFFFFF;
-				}
+				};
 				&.eated {
 					color : #777;
 				};
@@ -56,14 +98,14 @@ body {
 						width: 15px;
 						height: 5px;
 						background-color: white;
-
+							
 					    -webkit-animation: 0.8s blink step-end infinite;
 					    -moz-animation: 0.8s blink step-end infinite;
-					}
+					};
 					// color : #fff;
 				};
 				
-			}
+			};
 
 		};
 	};

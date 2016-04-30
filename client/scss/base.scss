@@ -5,15 +5,7 @@ $break-xs: 767px;
 $break-sm: 991px;
 $break-md: 1200px;
 
-@-webkit-keyframes blink {
-    from, to { border-color: transparent }
-    50% { border-color: black }
-}
 
-@-moz-keyframes blink {
-    from, to { border-color: transparent }
-    50% { border-color: black }
-}
 
 @mixin respond($media) {
 	@if $media == xxs {

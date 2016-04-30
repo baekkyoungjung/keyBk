@@ -13,118 +13,23 @@ export default class App extends Component {
 		].forEach( (method) => this[method] = this[method].bind(this) );
 
 		this.state = {
-			pressCode : {
-				' ' :   32,
-				'!'	: 	33,
-				'"'	: 	34,
-				'#'	: 	35,
-				'$'	: 	36,
-				'%'	: 	37,
-				'&'	: 	38,
-				"'"	: 	39,
-				'('	: 	40,
-				')'	: 	41,
-				'*'	: 	42,
-				'+'	: 	43,
-				','	: 	44,
-				'-'	: 	45,
-				'.'	: 	46,
-				'/'	: 	47,
-				'{'	: 	123,
-				'|'	: 	124,
-				'}'	: 	125,
-				'~'	: 	126,
-				':'	: 	58,
-				';'	: 	59,
-				'<'	: 	60,
-				'='	: 	61,
-				'>'	: 	62,
-				'?'	: 	63,
-				'@'	: 	64,
-				']'	: 	91,
-				']'	: 	93,
-				'^'	: 	94,
-				'_'	: 	95,
-				'`'	: 	96,
-				0	: 	48,
-				1	: 	49,
-				2	: 	50,
-				3	: 	51,
-				4	: 	52,
-				5	: 	53,
-				6	: 	54,
-				7	: 	55,
-				8	: 	56,
-				9	: 	57,
-				A	: 	65,
-				B	: 	66,
-				C	: 	67,
-				D	: 	68,
-				E	: 	69,
-				F	: 	70,
-				G	: 	71,
-				H	: 	72,
-				I	: 	73,
-				J	: 	74,
-				K	: 	75,
-				L	: 	76,
-				M	: 	77,
-				N	: 	78,
-				O	: 	79,
-				P	: 	80,
-				Q	: 	81,
-				R	: 	82,
-				S	: 	83,
-				T	: 	84,
-				U	: 	85,
-				V	: 	86,
-				W	: 	87,
-				X	: 	88,
-				Y	: 	89,
-				Z	: 	90,
-				a	: 	97,
-				b	: 	98,
-				c	: 	99,
-				d	: 	100,
-				e	: 	101,
-				f	: 	102,
-				g	: 	103,
-				h	: 	104,
-				i	: 	105,
-				j	: 	106,
-				k	: 	107,
-				l	: 	108,
-				m	: 	109,
-				n	: 	110,
-				o	: 	111,
-				p	: 	112,
-				q	: 	113,
-				r	: 	114,
-				s	: 	115,
-				t	: 	116,
-				u	: 	117,
-				v	: 	118,
-				w	: 	119,
-				x	: 	120,
-				y	: 	121,
-				z	: 	122,
-				
-			},
+			pressCode : Bk.keyBk.pressCode,
+			keyBk : Bk.keyBk.defaultWords,
 			upCode : [8],
-			defaultWords : ['there is no spoon', 'i see dead people'],
 			practice : {
 				word : 'tHere is no spoon',
 				wordSplit : [],
 				keyCode : [],
-				index : null
-			}
+				index : null,
+				active : false
+			},
+
 		};
 	}
 
 	componentWillMount() {
 		var newData = this.settingsWord(this.state);
 		this.setState(newData);
-		
 	}
 
 	componentDidMount() {
@@ -132,7 +37,7 @@ export default class App extends Component {
 	}
 
 	settingsWord(newData){
-		newData.practice.word = Random.choice(this.state.defaultWords);
+		newData.practice.word = Random.choice(this.state.keyBk);
 		newData.practice.wordSplit = newData.practice.word.split("");
 		newData.practice.keyCode = [];
 		newData.practice.wordSplit.map((chunk, index) => {
@@ -142,7 +47,8 @@ export default class App extends Component {
 		return newData;
 	}
 
-	keyDetected(string, e){
+	keyDetected(e){
+		console.log('keyDetected', e.charCode)
 		var code = this.state.upCode.indexOf(e.keyCode) !== -1 ? e.keyCode : undefined || e.charCode === 0 ? undefined : e.charCode,
 			newData = this.state;
 		if(code === undefined) {
@@ -151,12 +57,12 @@ export default class App extends Component {
 		if(newData.practice.keyCode[newData.practice.index] !== code){
 			//틀림
 			if(code === 8){
-				$('#real-word').children('span.mis-typing').last().remove();
+				$('#real-word').children('div.mis-typing').last().remove();
 			}else {
-				$(this.refs[`chunk-${this.state.practice.index}`]).before(`<span class="mis-typing">${String.fromCharCode(code) === " " ? "&nbsp" : String.fromCharCode(code)}</span>`)
+				$(this.refs[`chunk-${this.state.practice.index}`]).before(`<div class="mis-typing">${String.fromCharCode(code) === " " ? "&nbsp" : String.fromCharCode(code)}</div>`)
 			}
 
-		}else if(!$('#real-word').children('span').hasClass('mis-typing')){
+		}else if(!$('#real-word').children('div').hasClass('mis-typing')){
 			//맞음
 			newData.practice.index++;
 
@@ -168,16 +74,19 @@ export default class App extends Component {
 	}
 
 	focusOut(e){
-		e.preventDefault();
-		e.stopPropagation();
-		$(this.refs.virtualView).removeClass('active');
+		
+		var toggleActive = this.state.practice;
+		toggleActive.active = false;
+		this.setState({practice : toggleActive});
 	}
 
 	focusWrite(e){
 		e.preventDefault();
 		e.stopPropagation();
 		this.refs.writeThis.focus();
-		$(this.refs.virtualView).addClass('active');
+		var toggleActive = this.state.practice;
+		toggleActive.active = true;
+		this.setState({practice : toggleActive});
 
 	}
  
@@ -186,11 +95,13 @@ export default class App extends Component {
             <div className="container">
 				<div id="virtual-write" ref="writeThis"
 					contentEditable
-					onKeyPress={this.keyDetected.bind(null, 'press')}
-					onKeyUp={this.keyDetected.bind(null, 'up')}
+					onKeyPress={this.keyDetected}
+					onKeyUp={this.keyDetected}
 				/>
-				<div id="test" onClick={this.focusOut}>
-					<div id="virtual-view" ref="virtualView" onClick={this.focusWrite}>
+				<div id="test" onClick={this.focusOut} className={this.state.practice.active ? "active" : ""}>
+					<div id="status">aoneuth</div>
+					<div id="virtual-view" ref="virtualView" className={this.state.practice.active ? "active" : ""} onClick={this.focusWrite}>
+						<div id="virtual-view-overlay" className={this.state.practice.active ? " " : "active"}>Click Me</div>
 						<div id="real-word">
 							{this.state.practice.wordSplit.map((chunk, index) => {
 								return (
