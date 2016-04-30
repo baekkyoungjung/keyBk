@@ -32,6 +32,7 @@ body {
 	width : 100%;
 	#status {
 		background-color : #999;
+		font-size: 3rem;
 	};
 	#virtual-view {
 		background-color : #444;
@@ -40,7 +41,7 @@ body {
 		margin: auto;
 		position: relative;
 		height: 100px;
-		width : 700px;
+		width : 900px;
 		color: #777;
 		outline : #000 solid 1px;
 		overflow: hidden;
@@ -68,10 +69,6 @@ body {
 			color : #eee;
 		};
 		#real-word {
-			position: absolute;
-		    top: 0;
-		    left: 0;
-			
 			height: 100%;
 			font-size: 3.0rem;
 			> div {
