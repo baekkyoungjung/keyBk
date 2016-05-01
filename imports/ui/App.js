@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
- 
+import { toJS, fromJS, Map, List, OrderedSet } from 'immutable'; 
 // App component - represents the whole app
 export default class App extends Component {
 	constructor(props){
 		super(props);
 		[	
+			'optionsChange',
 			'settingsWord',
 			'keyDetected',
 			'focusOut',
@@ -15,6 +16,11 @@ export default class App extends Component {
 			pressCode : Bk.keyBk.pressCode,
 			keyBk : Bk.keyBk.defaultWords,
 			upCode : [8],
+			options : {
+				deleteUpper : false,
+				changeTheme : 'black',
+				realtimeHidden : false
+			},
 			practice : {
 				word : 'tHere is no spoon',
 				wordSplit : [],
@@ -22,72 +28,96 @@ export default class App extends Component {
 				keyCode : [],
 				index : null,
 				active : false,
-				startTime : null,
-				cpm : null,
-				cpmAvg : null
+				cpmStatus : {
+					startTime : null,
+					cpm : 0,
+					cpmTotal : 0,
+					cpmAvg : 0,
+				}
 			},
-
 		};
 	}
 
-	componentWillMount() {
-		var newData = this.settingsWord(this.state);
-		this.setState(newData);
+	optionsChange(type = this.state.options.changeTheme){
+		var newOptions = this.state.options = {
+			changeTheme : type,
+			deleteUpper : this.refs.deleteUpper.checked,
+			realtimeHidden : this.refs.realtimeHidden.checked
+		};
+		newOptions.changeTheme = type;
+		this.setState({options : newOptions});
+		this.settingsWord(undefined, this.refs.deleteUpper.checked)
 	}
 
-	settingsWord(newData){
-		console.log('newData.practice.word', newData.practice.word)
-		newData.practice.word = Random.choice(this.state.keyBk);
-		// newData.practice.word = newData.practice.word.replace(/ /gi, "␣");
+	componentWillMount() {
+		var newData = this.state.practice;
+		newData.word = Random.choice(this.state.keyBk);
+		this.settingsWord(newData);
+		this.setState({practice : newData});
+	}
+
+	settingsWord(newData = this.state.practice){
+		if(this.state.options.deleteUpper){
+			newData.wordSplit = newData.word.toLowerCase().split("");
+		}else {
+			newData.wordSplit = newData.word.split("");
+		};
+		// newData.word = newData.word.replace(/ /gi, "␣");
 	    // console.log('getTextWidth, type, d, glb, text, zoom', type, d, glb, text, zoom);
-		newData.practice.wordSplit = newData.practice.word.split("");
-		newData.practice.keyCode = [];
-		newData.practice.wordSplit.map((chunk, index) => {
-			newData.practice.keyCode.push(this.state.pressCode[chunk]);
+		newData.keyCode = [];
+		newData.wordSplit.map((chunk, index) => {
+			newData.keyCode.push(this.state.pressCode[chunk]);
 		});
-		newData.practice.index = 0;
-		newData.practice.cpmAvg = Math.floor(newData.practice.cpm / newData.practice.wordIndex);
-		newData.practice.wordIndex++;
+		newData.index = 0;
+		if(newData.wordIndex > 0){
+			newData.cpmStatus.cpmTotal += newData.cpmStatus.cpm;
+			newData.cpmStatus.cpmAvg = Math.floor(newData.cpmStatus.cpmTotal / newData.wordIndex);
+		};
+
+		newData.wordIndex++;
 		return newData;
 	}
 
 	keyDetected(e){
 		console.log('keyDetected', e.charCode)
 		var code = this.state.upCode.indexOf(e.keyCode) !== -1 ? e.keyCode : undefined || e.charCode === 0 ? undefined : e.charCode,
-			newData = this.state;
+			newData = this.state.practice;
 		if(code === undefined) {
 			return false;
 		}
-		if(newData.practice.keyCode[newData.practice.index] !== code){
+		if(newData.keyCode[newData.index] !== code){
 			//틀림
 			if(code === 8){
 				$('#real-word').children('div.mis-typing').last().remove();
 			}else {
-				$(this.refs[`chunk-${this.state.practice.index}`]).before(`<div class="mis-typing">${String.fromCharCode(code) === " " ? "&nbsp" : String.fromCharCode(code)}</div>`)
+				$(this.refs[`chunk-${newData.index}`]).before(`<div class="mis-typing">${String.fromCharCode(code) === " " ? "&nbsp" : String.fromCharCode(code)}</div>`)
 			};
 
 		}else if(!$('#real-word').children('div').hasClass('mis-typing')){
 			//맞음
-			if(newData.practice.index === 0){
+			if(newData.index === 0){
 				//첫진입이므로 시간 체크 시작
-				newData.practice.startTime = new Date().getTime();
+				newData.cpmStatus.startTime = new Date().getTime();
 			}else {
 				//속도는 일단 cpm기준으로 index / 시간
 				//시간은 첫 스타트 타임에서 항상 뺀값 거기에 per min이니 나누기 60
- 				newData.practice.cpm  = Math.floor(newData.practice.index / ((Math.abs(newData.practice.startTime - new Date().getTime()) / 1000) / 60));
+
+ 				newData.cpmStatus.cpm  = Math.floor(newData.index / ((Math.abs(newData.cpmStatus.startTime - new Date().getTime()) / 1000) / 60));
+
 
 			};
-			newData.practice.index++;
+			newData.index++;
 
 		};
-		if(newData.practice.wordSplit.length === newData.practice.index){
+		if(newData.wordSplit.length === newData.index){
+			newData.word = Random.choice(this.state.keyBk);
 			newData = this.settingsWord(newData);
 		};
-		this.setState(newData);
+		console.log('newData', newData);
+		this.setState({practice : newData});
 	}
 
 	focusOut(e){
-		
 		var toggleActive = this.state.practice;
 		toggleActive.active = false;
 		this.setState({practice : toggleActive});
@@ -105,7 +135,39 @@ export default class App extends Component {
  
     render() {
         return (
-            <div className="container">
+            <div className={"container " + (this.state.options.changeTheme)}>
+	            <form>
+	            	<div className="form-group">
+	            		<div id="options">
+	            			<div id="change-theme" className="text-center">
+	            				<span className="theme-select">
+	            					<button type="button" 
+	            						className={"btn btn-xs btn-default black " + (this.state.options.changeTheme === 'white' ? " " : "active")}
+	            						onClick={this.optionsChange.bind(null, 'black')}
+	            					/>
+	            				</span>
+	            				<span className="theme-select">
+	            					<button type="button" 
+		            					className={"btn btn-xs btn-default white " + (this.state.options.changeTheme ==='white' ? "active" : " ")}
+										onClick={this.optionsChange.bind(null, 'white')}
+		            				/>
+	            				</span>
+	            			</div>
+	            			<div id="delete-upper" className="checkbox" >
+	            				<label onClick={this.optionsChange}>
+	            				  <input ref="deleteUpper" type="checkbox"/>
+	            					  짜증나는 대문자 없애기
+	            				</label>
+	            			</div>
+	            			<div id="delete-upper" className="checkbox" >
+	            				<label onClick={this.optionsChange}>
+	            				  <input ref="realtimeHidden" type="checkbox"/>
+	            					  실시간 속도 가리기
+	            				</label>
+	            			</div>
+	            		</div>
+	            	</div>
+	            </form>
 				<div id="virtual-write" ref="writeThis"
 					contentEditable
 					onKeyPress={this.keyDetected}
@@ -113,8 +175,8 @@ export default class App extends Component {
 				/>
 				<div id="test" onClick={this.focusOut} className={this.state.practice.active ? "active" : ""}>
 					<div id="status" className="text-center">
-						<div>{this.state.practice.cpmAvg}</div>
-						<div>{this.state.practice.cpm}</div>
+						<div>{this.state.practice.cpmStatus.cpmAvg}</div>
+						<div className={this.state.options.realtimeHidden ? "hidden" : " "}>{this.state.practice.cpmStatus.cpm}</div>
 					</div>
 					<div id="virtual-view" ref="virtualView" className={this.state.practice.active ? "active" : ""} 
 						onClick={this.focusWrite}
@@ -129,23 +191,7 @@ export default class App extends Component {
 						</div>
 					</div>
 				</div>
-				<form>
-					<div className="form-group">
-						<div className="checkbox">
-							<label>
-							  <input type="checkbox"/>
-								  짜증나는 대문자 없애기
-							</label>
-						</div>
-						<div className="checkbox">
-							<label>
-							  <input type="checkbox"/>
-								  테마 변경
-							</label>
-						</div>
-					</div>
-					<button type="button" class="btn btn-sm btn-default">확인</button>
-				</form>
+
             </div>
         )
     }

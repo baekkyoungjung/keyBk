@@ -107,3 +107,68 @@ body {
 		};
 	};
 };
+
+.container {
+	form {
+		.form-group {
+			width: 500px;
+			margin: auto;
+			#options {
+				#change-theme {
+					.theme-select {
+						button {
+							position: relative;
+							width: 35px;
+							height: 35px;
+							&.active {
+								&:before {
+									content: "";
+									display: block;
+									position: absolute;
+									left: 2px;
+								    top: 8px;
+									width: 0;
+									height: 0;
+									border-left: 15px solid transparent;
+									border-right: 15px solid transparent;
+									border-top: 15px solid #555;
+									// background-color: red;
+								}
+								&:after {
+									content: "";
+									display: block;
+									position: absolute;
+									left: 2px;
+								    top: 4px;
+									width: 0;
+									height: 0;
+									border-left: 15px solid transparent;
+									border-right: 15px solid transparent;
+								}
+							}
+							&.black {
+								background-color: #555;
+								&:before{
+									border-top: 20px solid red;
+								} 
+								&:after {
+									border-top: 15px solid #555;
+								}
+							}
+							&.white {
+								background-color: #eee;
+								&:before{
+									border-top: 20px solid red;
+								} 
+								&:after {
+									border-top: 15px solid #eee;
+								}
+							}
+						}
+					}
+				}
+
+			}
+		}
+	}
+}
